@@ -173,7 +173,7 @@ class ExpectationsManager {
 
         // Análisis simple de palabras clave en expectativas
         const palabrasClave = this.analizarPalabrasClave(course);
-        
+
         return `
             <div class="row">
                 <div class="col-md-6">
@@ -205,8 +205,8 @@ class ExpectationsManager {
                                 <small class="text-muted">• ${participant.nombre}</small>
                             </div>
                         `).join('')}
-                        ${this.getParticipantesSinResponder(course).length === 0 ? 
-                            '<small class="text-success">¡Todos han respondido!</small>' : ''}
+                        ${this.getParticipantesSinResponder(course).length === 0 ?
+                '<small class="text-success">¡Todos han respondido!</small>' : ''}
                     </div>
                 </div>
             </div>
@@ -216,7 +216,7 @@ class ExpectationsManager {
     static analizarPalabrasClave(course) {
         const palabrasComunes = ['aprender', 'conocer', 'desarrollar', 'mejorar', 'aplicar', 'entender', 'lograr'];
         const frecuencia = {};
-        
+
         Object.values(course.expectativas.respuestas).forEach(respuesta => {
             const texto = (respuesta.expectativa1 + ' ' + respuesta.expectativa2 + ' ' + respuesta.expectativa3).toLowerCase();
             palabrasComunes.forEach(palabra => {
@@ -225,7 +225,7 @@ class ExpectationsManager {
                 }
             });
         });
-        
+
         return Object.entries(frecuencia).sort((a, b) => b[1] - a[1]);
     }
 
@@ -233,31 +233,68 @@ class ExpectationsManager {
         if (!course.participantes || !course.expectativas || !course.expectativas.respuestas) {
             return course.participantes || [];
         }
-        
-        return course.participantes.filter(participant => 
+
+        return course.participantes.filter(participant =>
             !course.expectativas.respuestas[participant.id]
         );
     }
 
     static generarQRCode(course) {
-        // Simular generación de QR (en realidad sería un enlace único)
+        const qrContainer = document.getElementById('qrcode-container');
+
+        // Limpiar contenedor
+        qrContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Generando QR...</span></div><p class="mt-2">Generando código QR...</p></div>';
+
+        // Crear URL única para este curso
+        const courseData = {
+            courseId: course.id,
+            courseName: course.nombre,
+            timestamp: Date.now()
+        };
+
+        const encodedData = btoa(JSON.stringify(courseData));
+        const qrUrl = `${window.location.origin}${window.location.pathname}?expectations=${encodedData}`;
+
+        // Generar QR real
         setTimeout(() => {
-            const qrUrl = `${window.location.origin}${window.location.pathname}?course=${course.id}&module=expectations`;
-            $('#qrcode-container').html(`
+            QRCode.toDataURL(qrUrl, {
+                width: 200,
+                height: 200,
+                margin: 1,
+                color: {
+                    dark: '#1a2a6c',
+                    light: '#ffffff'
+                }
+            }, (err, url) => {
+                if (err) {
+                    qrContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error generando QR: ${err.message}
+                    </div>
+                `;
+                    return;
+                }
+
+                qrContainer.innerHTML = `
                 <div class="text-center">
-                    <div style="width: 200px; height: 200px; background: #f8f9fa; border: 2px dashed #dee2e6; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px;">
-                        <div class="text-center">
-                            <i class="fas fa-qrcode fa-3x text-muted mb-2"></i>
-                            <br>
-                            <small class="text-muted">Código QR</small>
-                        </div>
+                    <img src="${url}" alt="Código QR para expectativas" 
+                         style="border: 2px solid #dee2e6; border-radius: 10px; padding: 10px; background: white;">
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary btn-sm mr-2" onclick="navigator.clipboard.writeText('${qrUrl}')">
+                            <i class="fas fa-copy"></i> Copiar Enlace
+                        </button>
+                        <a href="${qrUrl}" target="_blank" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-external-link-alt"></i> Abrir
+                        </a>
                     </div>
-                    <div class="mt-2">
-                        <small class="text-muted">Enlace: ${qrUrl}</small>
-                    </div>
+                    <small class="text-muted d-block mt-2">
+                        Los participantes escanean o hacen clic en el enlace
+                    </small>
                 </div>
-            `);
-        }, 1000);
+            `;
+            });
+        }, 500);
     }
 
     static bindExpectationsEvents(course) {
@@ -269,6 +306,43 @@ class ExpectationsManager {
         $('#run-evaluation-btn').on('click', () => this.showFinalEvaluation(course));
         $('#view-all-responses-btn').on('click', () => this.showAllResponses(course));
         $('#start-expectations-setup').on('click', () => this.showSetupForm(course));
+    }
+
+    // AGREGAR este método para cargar respuestas del localStorage
+    static cargarRespuestasQR(course) {
+        if (!course.expectativas) {
+            course.expectativas = { respuestas: {} };
+        }
+
+        const allExpectations = JSON.parse(localStorage.getItem('infotep-expectations') || '[]');
+        const courseExpectations = allExpectations.filter(exp => exp.courseId === course.id);
+
+        courseExpectations.forEach(exp => {
+            if (!course.expectativas.respuestas[exp.participantId]) {
+                course.expectativas.respuestas[exp.participantId] = {
+                    expectativa1: exp.expectation1,
+                    expectativa2: exp.expectation2,
+                    expectativa3: exp.expectation3,
+                    fechaRespuesta: exp.timestamp,
+                    metodo: 'qr',
+                    nombre: exp.participantName
+                };
+            }
+        });
+
+        app.saveCourses();
+        return courseExpectations.length;
+    }
+
+    // Y en showExpectationsManager, llama este método:
+    static showExpectationsManager(course) {
+        // Cargar respuestas QR al abrir el módulo
+        const nuevasRespuestas = this.cargarRespuestasQR(course);
+        if (nuevasRespuestas > 0) {
+            console.log(`Se cargaron ${nuevasRespuestas} nuevas respuestas QR`);
+        }
+
+        // ... el resto del código permanece igual
     }
 
     static showSetupForm(course) {
@@ -360,7 +434,7 @@ class ExpectationsManager {
             $('#question2').val(),
             $('#question3').val()
         ];
-        
+
         course.expectativas.instrucciones = $('#instructions').val();
         course.expectativas.permiteEdicion = $('#allowEdits').is(':checked');
         course.expectativas.fechaConfiguracion = new Date().toISOString();
@@ -462,7 +536,7 @@ class ExpectationsManager {
 
         course.expectativas.respuestas[participantId] = respuesta;
         app.saveCourses();
-        
+
         app.showNotification('Expectativas guardadas correctamente', 'success');
         this.showExpectationsManager(course);
     }

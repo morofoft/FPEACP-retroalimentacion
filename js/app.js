@@ -309,6 +309,11 @@ class InfotepApp {
                                         <i class="fas fa-bullseye"></i> Módulo Expectativas
                                     </button>
                                 </div>
+                                <div class="col-md-4">
+    <button class="btn btn-purple btn-block mb-2" id="expectations-manager-btn">
+        <i class="fas fa-bullseye"></i> Módulo Expectativas
+    </button>
+</div>
                             </div>
                         </div>
                     </div>
