@@ -1,0 +1,264 @@
+:root {
+    --primary: #1a2a6c;
+    --secondary: #2c3e50;
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+}
+
+/* Estilos personalizados para la rueda */
+.wheel-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto;
+}
+
+#wheel-canvas {
+    border-radius: 50%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: white;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 40px;
+    background: var(--danger);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    z-index: 10;
+}
+
+.selected-display {
+    padding: 20px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--success) 0%, #20c997 100%);
+    color: white;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.selected-icon {
+    margin-bottom: 15px;
+}
+
+.selected-name {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selected-persons {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.selected-person {
+    background: var(--warning);
+    color: white;
+    padding: 10px 15px;
+    margin: 5px 0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: popIn 0.5s ease;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Tarjetas de comunidades */
+.comunidad-card {
+    border-left: 4px solid var(--primary);
+    margin-bottom: 15px;
+}
+
+.comunidad-card .card-body {
+    padding: 15px;
+}
+
+.comunidad-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* Animaciones */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinning {
+    animation: spin 4s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wheel-container {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .selected-name {
+        font-size: 1.4rem;
+    }
+}
+
+/* Personalización AdminLTE */
+.brand-link {
+    border-bottom: none;
+}
+
+.main-sidebar {
+    background: var(--secondary);
+}
+
+.nav-sidebar > .nav-item > .nav-link.active {
+    background-color: var(--primary);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: #152258;
+    border-color: #152258;
+}
+
+/* Tablas */
+#participants-table_wrapper {
+    margin-top: 10px;
+}
+
+.dataTables_filter {
+    float: right;
+}
+
+.dataTables_length {
+    float: left;
+}
+
+/* Estilos para el contenedor del gráfico */
+#stats-chart {
+    max-height: 400px;
+    width: 100%;
+}
+
+.card-body canvas {
+    width: 100% !important;
+    height: 400px !important;
+}
+
+/* Asegurar que el gráfico sea responsive */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+/* Estilos para comunidades */
+.principal-community {
+    border: 2px solid #1a2a6c !important;
+}
+
+.secondary-community {
+    border: 1px solid #dee2e6;
+}
+
+.add-community-card {
+    border: 2px dashed #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.add-community-card:hover {
+    border-color: #28a745;
+    background-color: #f0fff4;
+}
+
+.comunidad-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    border: 2px solid white;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+/* Badges para comunidades */
+.badge-sm {
+    font-size: 0.7em;
+    padding: 0.25em 0.4em;
+}
+
+/* Tabla de participantes */
+#participants-table td {
+    vertical-align: middle;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+/* Estilos para la tabla de participantes */
+#participants-table {
+    font-size: 0.9rem;
+}
+
+#participants-table td {
+    vertical-align: middle;
+    padding: 0.75rem;
+}
+
+#participants-table .badge {
+    font-size: 0.75em;
+    padding: 0.3em 0.6em;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+}
+
+/* Mensaje cuando no hay datos */
+.text-muted {
+    color: #6c757d !important;
+    font-style: italic;
+}
+
+/* Debug button */
+#debug-btn {
+    display: none; /* Ocultar en producción */
+}
