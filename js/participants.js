@@ -1,192 +1,149 @@
-// Gestión de participantes
+// Gestión de Participantes por Curso
 class ParticipantsManager {
-    static participants = [];
+    static showParticipantsManager(course) {
+        $('#course-modules-content').html(`
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-users"></i> Gestión de Participantes
+                        <span class="badge badge-primary ml-2">${course.participantes ? course.participantes.length : 0} participantes</span>
+                    </h3>
+                    <div class="card-tools">
+                        <button class="btn btn-success btn-sm" id="add-participant-btn">
+                            <i class="fas fa-user-plus"></i> Agregar Participante
+                        </button>
+                        <button class="btn btn-info btn-sm" id="import-participants-btn">
+                            <i class="fas fa-file-import"></i> Importar Lista
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="search-participants" 
+                                   placeholder="Buscar por nombre o ID...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control" id="filter-community">
+                                <option value="">Todas las comunidades</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="dinamica">Dinámica</option>
+                                <option value="orden">Orden y Limpieza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control" id="filter-status">
+                                <option value="">Todos los estados</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>ID</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Comunidades</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="participants-table-body">
+                                <!-- Los participantes se cargarán aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    ${(!course.participantes || course.participantes.length === 0) ? `
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h4>No hay participantes registrados</h4>
+                        <p class="text-muted">Comienza agregando participantes al curso</p>
+                        <button class="btn btn-primary" id="add-first-participant">
+                            <i class="fas fa-user-plus"></i> Agregar Primer Participante
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `);
 
-    static loadParticipants() {
-        const saved = localStorage.getItem('dinamica-participants');
-        if (saved) {
-            this.participants = JSON.parse(saved);
-        } else {
-            this.participants = this.getDefaultParticipants();
-            this.saveParticipants();
-        }
-        console.log('Participantes cargados:', this.participants.length);
-        this.renderParticipantsTable();
+        this.renderParticipantsTable(course);
+        this.bindParticipantsEvents(course);
     }
 
-    static getDefaultParticipants() {
-        const defaultNames = [
-            "MARIEL COCA", "GENLY CONCEPCION", "YORCALIS CORDERO", "LEONARDO ENCARNACIÓN",
-            "YAMALY FELIZ", "PEDRO GARCIA", "JOFFREY GONZALEZ", "DAYANARA LEREBOURS",
-            "ELISANDRO LUCIANO", "YHAMNUARY MATEO", "LISSETTE MEDINA", "MARIA MIRANDA",
-            "HENNY OGANDO", "LETICIA PANIAGUA", "KERVIN PIRON", "RICHARD RAMIREZ",
-            "YONAIRY RAMOS", "LETICIA REYES", "LILIAN RODRIGUEZ", "WILSON TERRERO",
-            "MAIKOL URIBE", "ORBIC VICIOSO", "ROSSY VILLEGAS"
-        ];
+    static renderParticipantsTable(course) {
+        const tbody = $('#participants-table-body');
+        tbody.empty();
 
-        const principalCommunity = CommunitiesManager.getPrincipalCommunity();
-        const principalId = principalCommunity ? principalCommunity.id : 'principal';
-        
-        return defaultNames.map((nombre, index) => ({
-            id: 'part-' + index,
-            nombre: nombre,
-            comunidadPrincipal: principalId,
-            comunidadesSecundarias: [],
-            activo: true,
-            vecesSeleccionado: 0,
-            fechaRegistro: new Date().toISOString()
-        }));
-    }
-
-    static saveParticipants() {
-        localStorage.setItem('dinamica-participants', JSON.stringify(this.participants));
-    }
-
-    static getParticipants() {
-        return this.participants;
-    }
-
-    static getParticipantsByCommunity(comunidadId, tipo = 'todos') {
-        return this.participants.filter(p => {
-            if (tipo === 'principal') {
-                return p.comunidadPrincipal === comunidadId;
-            } else if (tipo === 'secundaria') {
-                return p.comunidadesSecundarias && p.comunidadesSecundarias.includes(comunidadId);
-            } else {
-                return p.comunidadPrincipal === comunidadId || 
-                       (p.comunidadesSecundarias && p.comunidadesSecundarias.includes(comunidadId));
-            }
-        });
-    }
-
-    static getParticipant(id) {
-        return this.participants.find(p => p.id === id);
-    }
-
-    static addParticipant(participantData) {
-        const principalCommunity = CommunitiesManager.getPrincipalCommunity();
-        const principalId = principalCommunity ? principalCommunity.id : 'principal';
-        
-        const newParticipant = {
-            id: 'part-' + Date.now(),
-            comunidadPrincipal: principalId,
-            comunidadesSecundarias: [],
-            ...participantData,
-            vecesSeleccionado: 0,
-            fechaRegistro: new Date().toISOString(),
-            activo: true
-        };
-        
-        this.participants.push(newParticipant);
-        this.saveParticipants();
-        this.renderParticipantsTable();
-        
-        if (window.wheelManager) {
-            window.wheelManager.updateWheel();
-        }
-        
-        return newParticipant;
-    }
-
-    static updateParticipant(id, updates) {
-        const index = this.participants.findIndex(p => p.id === id);
-        if (index !== -1) {
-            this.participants[index] = { ...this.participants[index], ...updates };
-            this.saveParticipants();
-            this.renderParticipantsTable();
-            
-            if (window.wheelManager) {
-                window.wheelManager.updateWheel();
-            }
-        }
-    }
-
-    static deleteParticipant(id) {
-        this.participants = this.participants.filter(p => p.id !== id);
-        this.saveParticipants();
-        this.renderParticipantsTable();
-        
-        if (window.wheelManager) {
-            window.wheelManager.updateWheel();
-        }
-    }
-
-    static incrementSelectionCount(participantName) {
-        const participant = this.participants.find(p => p.nombre === participantName);
-        if (participant) {
-            participant.vecesSeleccionado = (participant.vecesSeleccionado || 0) + 1;
-            this.saveParticipants();
-            this.renderParticipantsTable();
-        }
-    }
-
-    static renderParticipantsTable() {
-        const tbody = $('#participants-table tbody');
-        console.log('Renderizando tabla de participantes...');
-        
-        if (this.participants.length === 0) {
-            tbody.html('<tr><td colspan="6" class="text-center text-muted">No hay participantes registrados</td></tr>');
+        if (!course.participantes || course.participantes.length === 0) {
             return;
         }
 
-        tbody.empty();
+        // Aplicar filtros
+        let filteredParticipants = [...course.participantes];
+        
+        // Filtro de búsqueda
+        const searchTerm = $('#search-participants').val().toLowerCase();
+        if (searchTerm) {
+            filteredParticipants = filteredParticipants.filter(p => 
+                p.nombre.toLowerCase().includes(searchTerm) || 
+                (p.id && p.id.toLowerCase().includes(searchTerm))
+            );
+        }
 
-        this.participants.forEach(participant => {
-            console.log('Procesando participante:', participant);
+        // Filtro por comunidad
+        const communityFilter = $('#filter-community').val();
+        if (communityFilter) {
+            filteredParticipants = filteredParticipants.filter(p => 
+                p.comunidadActual === communityFilter
+            );
+        }
+
+        // Filtro por estado
+        const statusFilter = $('#filter-status').val();
+        if (statusFilter) {
+            filteredParticipants = filteredParticipants.filter(p => 
+                p.estado === statusFilter
+            );
+        }
+
+        filteredParticipants.forEach(participant => {
+            const comunidadesHTML = this.getCommunitiesHTML(participant, course);
             
-            const comunidadPrincipal = CommunitiesManager.getCommunity(participant.comunidadPrincipal);
-            const comunidadesSecundarias = (participant.comunidadesSecundarias || [])
-                .map(comId => CommunitiesManager.getCommunity(comId))
-                .filter(com => com !== undefined);
-
-            // Verificar que la comunidad principal existe
-            if (!comunidadPrincipal) {
-                console.warn(`Comunidad principal no encontrada para participante: ${participant.nombre}`);
-                return;
-            }
-
-            const comunidadesSecundariasHTML = comunidadesSecundarias.length > 0 
-                ? comunidadesSecundarias.map(com => `
-                    <span class="badge badge-secondary mr-1 mb-1" style="background-color: ${com.color}">
-                        ${com.nombre}
-                    </span>
-                `).join('')
-                : '<span class="text-muted">Sin comunidades secundarias</span>';
-
             const row = $(`
                 <tr>
                     <td>
                         <strong>${participant.nombre}</strong>
+                        ${participant.observaciones ? `<br><small class="text-muted">${participant.observaciones}</small>` : ''}
                     </td>
+                    <td>${participant.id || 'N/A'}</td>
+                    <td>${participant.telefono || 'N/A'}</td>
+                    <td>${participant.email || 'N/A'}</td>
+                    <td>${comunidadesHTML}</td>
                     <td>
-                        <span class="badge badge-primary" style="background-color: ${comunidadPrincipal.color}">
-                            ${comunidadPrincipal.nombre}
+                        <span class="badge badge-${participant.estado === 'activo' ? 'success' : 'secondary'}">
+                            ${participant.estado}
                         </span>
-                    </td>
-                    <td>
-                        ${comunidadesSecundariasHTML}
-                    </td>
-                    <td>
-                        <span class="badge ${participant.activo ? 'badge-success' : 'badge-secondary'}">
-                            ${participant.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge badge-info">${participant.vecesSeleccionado || 0}</span>
                     </td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary edit-participant" data-id="${participant.id}" title="Editar">
+                            <button class="btn btn-outline-primary edit-participant" 
+                                    data-participant-id="${participant.id}">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-outline-info manage-communities" data-id="${participant.id}" title="Gestionar Comunidades">
-                                <i class="fas fa-layer-group"></i>
+                            <button class="btn btn-outline-info view-history" 
+                                    data-participant-id="${participant.id}">
+                                <i class="fas fa-history"></i>
                             </button>
-                            <button class="btn btn-outline-danger delete-participant" data-id="${participant.id}" title="Eliminar">
+                            <button class="btn btn-outline-danger delete-participant" 
+                                    data-participant-id="${participant.id}">
                                 <i class="fas fa-trash"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary toggle-participant" data-id="${participant.id}" title="${participant.activo ? 'Desactivar' : 'Activar'}">
-                                <i class="fas ${participant.activo ? 'fa-eye-slash' : 'fa-eye'}"></i>
                             </button>
                         </div>
                     </td>
@@ -196,172 +153,517 @@ class ParticipantsManager {
             tbody.append(row);
         });
 
-        console.log('Tabla renderizada con', this.participants.length, 'participantes');
-        this.bindParticipantEvents();
+        // Actualizar contador
+        const counter = $('#participants-table-body tr').length;
+        $('.card-title .badge').text(`${counter} participantes`);
     }
 
-    static bindParticipantEvents() {
-        // Limpiar eventos anteriores
-        $('.edit-participant').off('click');
-        $('.manage-communities').off('click');
-        $('.delete-participant').off('click');
-        $('.toggle-participant').off('click');
-
-        $('.edit-participant').on('click', function() {
-            const participantId = $(this).data('id');
-            ParticipantsManager.editParticipant(participantId);
-        });
-
-        $('.manage-communities').on('click', function() {
-            const participantId = $(this).data('id');
-            ParticipantsManager.manageParticipantCommunities(participantId);
-        });
-
-        $('.delete-participant').on('click', function() {
-            const participantId = $(this).data('id');
-            if (confirm('¿Estás seguro de que quieres eliminar este participante?')) {
-                ParticipantsManager.deleteParticipant(participantId);
+    static getCommunitiesHTML(participant, course) {
+        const comunidadActual = participant.comunidadActual;
+        let html = '';
+        
+        if (comunidadActual) {
+            const comunidad = course.comunidadesPrincipales.find(c => c.id === comunidadActual);
+            if (comunidad) {
+                html += `<span class="badge" style="background-color: ${comunidad.color}">${comunidad.nombre}</span>`;
             }
-        });
-
-        $('.toggle-participant').on('click', function() {
-            const participantId = $(this).data('id');
-            ParticipantsManager.toggleParticipantStatus(participantId);
-        });
-    }
-
-    static editParticipant(id) {
-        const participant = this.getParticipant(id);
-        if (!participant) {
-            alert('Participante no encontrado');
-            return;
         }
 
-        const newNombre = prompt('Nuevo nombre del participante:', participant.nombre);
-        if (newNombre && newNombre.trim() !== '' && newNombre !== participant.nombre) {
-            this.updateParticipant(id, { nombre: newNombre.trim() });
-            alert('Nombre actualizado correctamente');
-        }
-    }
-
-    static manageParticipantCommunities(id) {
-        const participant = this.getParticipant(id);
-        if (!participant) {
-            alert('Participante no encontrado');
-            return;
-        }
-
-        const secondaryCommunities = CommunitiesManager.getSecondaryCommunities();
-        
-        if (secondaryCommunities.length === 0) {
-            alert('No hay comunidades secundarias disponibles. Primero crea algunas comunidades secundarias.');
-            return;
-        }
-
-        let message = `Gestionar comunidades para: ${participant.nombre}\n\n`;
-        
-        const comunidadPrincipal = CommunitiesManager.getCommunity(participant.comunidadPrincipal);
-        message += `📍 Comunidad Principal: ${comunidadPrincipal ? comunidadPrincipal.nombre : 'No definida'}\n\n`;
-        
-        message += '🏷️ Comunidades Secundarias (selecciona números):\n';
-        
-        secondaryCommunities.forEach((comunidad, index) => {
-            const isMember = participant.comunidadesSecundarias && participant.comunidadesSecundarias.includes(comunidad.id);
-            message += `${index + 1}. [${isMember ? '✓' : ' '}] ${comunidad.nombre}\n`;
-        });
-
-        const userInput = prompt(message + '\n📝 Escribe los números de las comunidades a las que quieres que pertenezca (separados por coma, ej: 1,3):');
-        
-        if (userInput !== null) {
-            const selectedNumbers = userInput.split(',')
-                .map(num => parseInt(num.trim()))
-                .filter(num => !isNaN(num) && num >= 1 && num <= secondaryCommunities.length);
-            
-            const nuevasSecundarias = selectedNumbers.map(num => {
-                const index = num - 1;
-                return secondaryCommunities[index] ? secondaryCommunities[index].id : null;
-            }).filter(id => id !== null);
-
-            this.updateParticipant(id, { comunidadesSecundarias: nuevasSecundarias });
-            alert('Comunidades actualizadas correctamente');
-        }
-    }
-
-    static toggleParticipantStatus(id) {
-        const participant = this.getParticipant(id);
-        if (participant) {
-            const nuevoEstado = !participant.activo;
-            this.updateParticipant(id, { activo: nuevoEstado });
-            alert(`Participante ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
-        }
-    }
-
-    static showAddParticipantModal() {
-        const nombre = prompt('Nombre del nuevo participante:');
-        if (nombre && nombre.trim() !== '') {
-            this.addParticipant({
-                nombre: nombre.trim()
+        // Comunidades temporales activas
+        if (participant.comunidadesTemporales && participant.comunidadesTemporales.length > 0) {
+            participant.comunidadesTemporales.forEach(comTempId => {
+                const comTemp = course.comunidadesTemporales.find(ct => ct.id === comTempId);
+                if (comTemp) {
+                    html += `<span class="badge badge-secondary ml-1">${comTemp.nombre}</span>`;
+                }
             });
-            alert('Participante agregado correctamente');
-        } else if (nombre !== null) {
-            alert('El nombre no puede estar vacío');
+        }
+
+        return html || '<span class="text-muted">Sin asignar</span>';
+    }
+
+    static bindParticipantsEvents(course) {
+        // Agregar participante
+        $('#add-participant-btn, #add-first-participant').off('click').on('click', () => {
+            this.showAddParticipantForm(course);
+        });
+
+        // Búsqueda y filtros en tiempo real
+        $('#search-participants, #filter-community, #filter-status').off('input change').on('input change', () => {
+            this.renderParticipantsTable(course);
+        });
+
+        // Editar participante
+        $('.edit-participant').off('click').on('click', function() {
+            const participantId = $(this).data('participant-id');
+            ParticipantsManager.showEditParticipantForm(course, participantId);
+        });
+
+        // Ver historial
+        $('.view-history').off('click').on('click', function() {
+            const participantId = $(this).data('participant-id');
+            ParticipantsManager.showParticipantHistory(course, participantId);
+        });
+
+        // Eliminar participante
+        $('.delete-participant').off('click').on('click', function() {
+            const participantId = $(this).data('participant-id');
+            ParticipantsManager.deleteParticipant(course, participantId);
+        });
+
+        // Importar lista
+        $('#import-participants-btn').off('click').on('click', () => {
+            this.showImportParticipantsForm(course);
+        });
+    }
+
+    static showAddParticipantForm(course) {
+        $('#course-modules-content').html(`
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user-plus"></i> Agregar Nuevo Participante
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="add-participant-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre Completo *</label>
+                                    <input type="text" class="form-control" id="participant-name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>ID/Cédula</label>
+                                    <input type="text" class="form-control" id="participant-id">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Teléfono</label>
+                                    <input type="tel" class="form-control" id="participant-phone">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" id="participant-email">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Comunidad Principal Inicial</label>
+                            <select class="form-control" id="participant-community">
+                                <option value="">Asignar automáticamente</option>
+                                ${course.comunidadesPrincipales.map(com => 
+                                    `<option value="${com.id}">${com.nombre}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Observaciones</label>
+                            <textarea class="form-control" id="participant-notes" rows="3" 
+                                      placeholder="Notas adicionales sobre el participante..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Participante
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-add-participant">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `);
+
+        $('#add-participant-form').on('submit', (e) => {
+            e.preventDefault();
+            this.addParticipant(course);
+        });
+
+        $('#cancel-add-participant').on('click', () => {
+            this.showParticipantsManager(course);
+        });
+    }
+
+    static addParticipant(course) {
+        const participantData = {
+            id: $('#participant-id').val() || 'PART-' + Date.now(),
+            nombre: $('#participant-name').val(),
+            telefono: $('#participant-phone').val(),
+            email: $('#participant-email').val(),
+            observaciones: $('#participant-notes').val(),
+            estado: 'activo',
+            fechaRegistro: new Date().toISOString()
+        };
+
+        // Validación
+        if (!participantData.nombre.trim()) {
+            alert('El nombre es obligatorio');
+            return;
+        }
+
+        // Asignar comunidad automáticamente si no se especificó
+        if (!$('#participant-community').val()) {
+            // Asignar a la comunidad con menos participantes
+            const communityCounts = {};
+            course.comunidadesPrincipales.forEach(com => {
+                communityCounts[com.id] = course.participantes ? 
+                    course.participantes.filter(p => p.comunidadActual === com.id).length : 0;
+            });
+            
+            const minCommunity = Object.keys(communityCounts).reduce((a, b) => 
+                communityCounts[a] < communityCounts[b] ? a : b
+            );
+            
+            participantData.comunidadActual = minCommunity;
+        } else {
+            participantData.comunidadActual = $('#participant-community').val();
+        }
+
+        // Inicializar arrays
+        participantData.comunidadesTemporales = [];
+        participantData.historialComunidades = [{
+            comunidad: participantData.comunidadActual,
+            fechaAsignacion: new Date().toISOString(),
+            tipo: 'inicial'
+        }];
+
+        // Agregar al curso
+        if (!course.participantes) {
+            course.participantes = [];
+        }
+        
+        course.participantes.push(participantData);
+        app.saveCourses();
+        
+        app.showNotification('Participante agregado exitosamente', 'success');
+        this.showParticipantsManager(course);
+    }
+
+    static showEditParticipantForm(course, participantId) {
+        const participant = course.participantes.find(p => p.id === participantId);
+        if (!participant) return;
+
+        $('#course-modules-content').html(`
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-edit"></i> Editar Participante: ${participant.nombre}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="edit-participant-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre Completo *</label>
+                                    <input type="text" class="form-control" id="edit-participant-name" 
+                                           value="${participant.nombre}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>ID/Cédula</label>
+                                    <input type="text" class="form-control" id="edit-participant-id" 
+                                           value="${participant.id || ''}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Teléfono</label>
+                                    <input type="tel" class="form-control" id="edit-participant-phone" 
+                                           value="${participant.telefono || ''}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" id="edit-participant-email" 
+                                           value="${participant.email || ''}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select class="form-control" id="edit-participant-status">
+                                <option value="activo" ${participant.estado === 'activo' ? 'selected' : ''}>Activo</option>
+                                <option value="inactivo" ${participant.estado === 'inactivo' ? 'selected' : ''}>Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Observaciones</label>
+                            <textarea class="form-control" id="edit-participant-notes" rows="3">${participant.observaciones || ''}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Actualizar Participante
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-edit-participant">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `);
+
+        $('#edit-participant-form').on('submit', (e) => {
+            e.preventDefault();
+            this.updateParticipant(course, participantId);
+        });
+
+        $('#cancel-edit-participant').on('click', () => {
+            this.showParticipantsManager(course);
+        });
+    }
+
+    static updateParticipant(course, participantId) {
+        const participantIndex = course.participantes.findIndex(p => p.id === participantId);
+        if (participantIndex === -1) return;
+
+        const updates = {
+            nombre: $('#edit-participant-name').val(),
+            id: $('#edit-participant-id').val(),
+            telefono: $('#edit-participant-phone').val(),
+            email: $('#edit-participant-email').val(),
+            estado: $('#edit-participant-status').val(),
+            observaciones: $('#edit-participant-notes').val()
+        };
+
+        // Validación
+        if (!updates.nombre.trim()) {
+            alert('El nombre es obligatorio');
+            return;
+        }
+
+        course.participantes[participantIndex] = {
+            ...course.participantes[participantIndex],
+            ...updates
+        };
+
+        app.saveCourses();
+        app.showNotification('Participante actualizado exitosamente', 'success');
+        this.showParticipantsManager(course);
+    }
+
+    static deleteParticipant(course, participantId) {
+        const participant = course.participantes.find(p => p.id === participantId);
+        if (!participant) return;
+
+        if (confirm(`¿Estás seguro de que quieres eliminar a ${participant.nombre}?`)) {
+            course.participantes = course.participantes.filter(p => p.id !== participantId);
+            app.saveCourses();
+            app.showNotification('Participante eliminado exitosamente', 'success');
+            this.showParticipantsManager(course);
         }
     }
 
-    static getParticipantsForWheel(comunidadId = null) {
-        let participantes = this.participants.filter(p => p.activo);
+    static showImportParticipantsForm(course) {
+        $('#course-modules-content').html(`
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-file-import"></i> Importar Lista de Participantes
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> Formato de Importación</h5>
+                        <p>Puedes pegar una lista de nombres, uno por línea. Opcionalmente incluir ID, teléfono y email separados por comas.</p>
+                        <p><strong>Formato:</strong> Nombre Apellido, ID, Teléfono, Email</p>
+                        <p><strong>Ejemplo:</strong><br>
+                        Juan Pérez, 001-1234567-8, 809-555-1234, juan@email.com<br>
+                        María García, 002-7654321-0, 809-555-5678, maria@email.com</p>
+                    </div>
 
-        if (comunidadId && comunidadId !== '') {
-            if (comunidadId === 'principal') {
-                // Todos los participantes activos están en la comunidad principal
-                // No necesitamos filtrar ya que todos pertenecen a la principal
+                    <form id="import-participants-form">
+                        <div class="form-group">
+                            <label>Lista de Participantes</label>
+                            <textarea class="form-control" id="participants-list" rows="10" 
+                                      placeholder="Pega aquí la lista de participantes..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Asignar a Comunidad</label>
+                            <select class="form-control" id="import-community">
+                                <option value="">Distribuir automáticamente</option>
+                                ${course.comunidadesPrincipales.map(com => 
+                                    `<option value="${com.id}">${com.nombre}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Importar Participantes
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-import">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `);
+
+        $('#import-participants-form').on('submit', (e) => {
+            e.preventDefault();
+            this.importParticipants(course);
+        });
+
+        $('#cancel-import').on('click', () => {
+            this.showParticipantsManager(course);
+        });
+    }
+
+    static importParticipants(course) {
+        const participantsText = $('#participants-list').val();
+        if (!participantsText.trim()) {
+            alert('Por favor ingresa la lista de participantes');
+            return;
+        }
+
+        const lines = participantsText.split('\n').filter(line => line.trim());
+        const newParticipants = [];
+        const targetCommunity = $('#import-community').val();
+
+        // Calcular distribución automática si no hay comunidad específica
+        const communityCounts = {};
+        if (!targetCommunity) {
+            course.comunidadesPrincipales.forEach(com => {
+                communityCounts[com.id] = course.participantes ? 
+                    course.participantes.filter(p => p.comunidadActual === com.id).length : 0;
+            });
+        }
+
+        lines.forEach((line, index) => {
+            const parts = line.split(',').map(part => part.trim());
+            const nombre = parts[0];
+            
+            if (!nombre) return;
+
+            let comunidadAsignada;
+            if (targetCommunity) {
+                comunidadAsignada = targetCommunity;
             } else {
-                // Filtrar por comunidad secundaria específica
-                participantes = participantes.filter(p => 
-                    p.comunidadesSecundarias && p.comunidadesSecundarias.includes(comunidadId)
+                // Asignar a la comunidad con menos participantes
+                const minCommunity = Object.keys(communityCounts).reduce((a, b) => 
+                    communityCounts[a] < communityCounts[b] ? a : b
                 );
+                comunidadAsignada = minCommunity;
+                communityCounts[minCommunity]++;
             }
-        }
 
-        return participantes.map(p => p.nombre);
+            const participant = {
+                id: parts[1] || 'IMP-' + Date.now() + '-' + index,
+                nombre: nombre,
+                telefono: parts[2] || '',
+                email: parts[3] || '',
+                estado: 'activo',
+                comunidadActual: comunidadAsignada,
+                fechaRegistro: new Date().toISOString(),
+                comunidadesTemporales: [],
+                historialComunidades: [{
+                    comunidad: comunidadAsignada,
+                    fechaAsignacion: new Date().toISOString(),
+                    tipo: 'importacion'
+                }]
+            };
+
+            newParticipants.push(participant);
+        });
+
+        // Agregar al curso
+        if (!course.participantes) {
+            course.participantes = [];
+        }
+        
+        course.participantes.push(...newParticipants);
+        app.saveCourses();
+        
+        app.showNotification(`${newParticipants.length} participantes importados exitosamente`, 'success');
+        this.showParticipantsManager(course);
     }
 
-    // Método para debug
-    static debugParticipants() {
-        console.log('=== DEBUG PARTICIPANTES ===');
-        console.log('Total participantes:', this.participants.length);
-        this.participants.forEach((p, i) => {
-            console.log(`${i + 1}. ${p.nombre} - Principal: ${p.comunidadPrincipal} - Secundarias:`, p.comunidadesSecundarias);
+    static showParticipantHistory(course, participantId) {
+        const participant = course.participantes.find(p => p.id === participantId);
+        if (!participant) return;
+
+        const historialHTML = participant.historialComunidades ? 
+            participant.historialComunidades.map(hist => `
+                <tr>
+                    <td>${hist.comunidad}</td>
+                    <td>${new Date(hist.fechaAsignacion).toLocaleDateString()}</td>
+                    <td>${hist.tipo}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="3" class="text-center">No hay historial</td></tr>';
+
+        $('#course-modules-content').html(`
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history"></i> Historial de ${participant.nombre}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>ID:</strong> ${participant.id || 'N/A'}</p>
+                            <p><strong>Comunidad Actual:</strong> ${participant.comunidadActual || 'No asignada'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Teléfono:</strong> ${participant.telefono || 'N/A'}</p>
+                            <p><strong>Email:</strong> ${participant.email || 'N/A'}</p>
+                        </div>
+                    </div>
+
+                    <h5>Historial de Comunidades</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Comunidad</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${historialHTML}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3">
+                        <button class="btn btn-secondary" id="back-from-history">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        $('#back-from-history').on('click', () => {
+            this.showParticipantsManager(course);
         });
     }
 }
 
-// Inicializar participantes
-$(document).ready(() => {
-    console.log('Inicializando gestor de participantes...');
-    
-    // Esperar a que las comunidades se carguen primero
-    const initParticipants = () => {
-        if (typeof CommunitiesManager !== 'undefined' && CommunitiesManager.getCommunities().length > 0) {
-            ParticipantsManager.loadParticipants();
-            
-            // Botón para agregar participante
-            $('#add-participant-btn').off('click').on('click', () => {
-                ParticipantsManager.showAddParticipantModal();
-            });
-
-            // Debug button (puedes remover esto después)
-            $('#add-participant-btn').after('<button id="debug-btn" class="btn btn-warning btn-sm ml-2"><i class="fas fa-bug"></i> Debug</button>');
-            $('#debug-btn').on('click', () => {
-                ParticipantsManager.debugParticipants();
-            });
-            
-            console.log('Gestor de participantes inicializado correctamente');
-        } else {
-            console.log('Esperando comunidades...');
-            setTimeout(initParticipants, 100);
-        }
-    };
-
-    initParticipants();
-});
+// Integrar con la aplicación principal
+window.ParticipantsManager = ParticipantsManager;

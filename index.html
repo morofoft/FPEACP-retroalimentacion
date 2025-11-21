@@ -1,87 +1,60 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Dinámica de Retroalimentación</title>
+    <title>INFOTEP - Gestión de Cursos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
 </head>
+
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-
-        <!-- Navbar -->
+        <!-- Navbar Principal -->
         <nav class="main-header navbar navbar-expand navbar-white navbar-light">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-                </li>
-            </ul>
-
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="far fa-bell"></i>
-                        <span class="badge badge-warning navbar-badge" id="notification-count">0</span>
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+                        <i class="fas fa-bars"></i>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-widget="fullscreen" role="button">
-                        <i class="fas fa-expand-arrows-alt"></i>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="#" class="nav-link" id="current-course-info">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Seleccionar Curso</span>
                     </a>
                 </li>
             </ul>
         </nav>
 
-        <!-- Sidebar -->
+        <!-- Sidebar con Cursos -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="index.html" class="brand-link">
-                <i class="fas fa-users brand-icon"></i>
-                <span class="brand-text font-weight-light">Dinámica Educativa</span>
+                <i class="fas fa-chalkboard-teacher brand-icon"></i>
+                <span class="brand-text font-weight-light">INFOTEP Manager</span>
             </a>
 
             <div class="sidebar">
+                <!-- Panel de Cursos -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                    <div class="image">
-                        <i class="fas fa-user-circle img-circle elevation-2"></i>
-                    </div>
                     <div class="info">
-                        <a href="#" class="d-block" id="professor-name">Profesor</a>
+                        <a href="#" class="d-block" id="course-manager-btn">
+                            <i class="fas fa-plus-circle"></i> Gestionar Cursos
+                        </a>
                     </div>
                 </div>
 
+                <!-- Lista de Cursos Activos -->
                 <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        id="courses-list">
+                        <!-- Los cursos se cargarán aquí dinámicamente -->
                         <li class="nav-item">
-                            <a href="#tab-rueda" class="nav-link active" data-toggle="tab">
-                                <i class="nav-icon fas fa-sync"></i>
-                                <p>Rueda de Selección</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#tab-comunidades" class="nav-link" data-toggle="tab">
-                                <i class="nav-icon fas fa-layer-group"></i>
-                                <p>Gestión de Comunidades</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#tab-participantes" class="nav-link" data-toggle="tab">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Gestión de Participantes</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#tab-configuracion" class="nav-link" data-toggle="tab">
-                                <i class="nav-icon fas fa-cogs"></i>
-                                <p>Configuración</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#tab-estadisticas" class="nav-link" data-toggle="tab">
-                                <i class="nav-icon fas fa-chart-bar"></i>
-                                <p>Estadísticas</p>
-                            </a>
+                            <div class="nav-link text-center">
+                                <small class="text-muted">No hay cursos activos</small>
+                            </div>
                         </li>
                     </ul>
                 </nav>
@@ -94,291 +67,89 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0" id="page-title">Rueda de Selección</h1>
+                            <h1 class="m-0" id="page-title">Gestión de Cursos INFOTEP</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="#">Inicio</a></li>
-                                <li class="breadcrumb-item active" id="breadcrumb-active">Rueda</li>
+                                <li class="breadcrumb-item active" id="breadcrumb-active">Dashboard</li>
                             </ol>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Main content -->
+            <!-- Contenido Principal -->
             <div class="content">
                 <div class="container-fluid">
-                    <div class="tab-content">
-                        
-                        <!-- Pestaña Rueda de Selección -->
-                        <div class="tab-pane active" id="tab-rueda">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="card card-primary">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Rueda de Participantes</h3>
-                                            <div class="card-tools">
-                                                <select class="form-control form-control-sm" id="comunidad-select">
-                                                    <option value="">Todas las comunidades</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="wheel-container text-center">
-                                                <canvas id="wheel-canvas" width="400" height="400"></canvas>
-                                                <div class="wheel-pointer"></div>
-                                            </div>
-                                        </div>
+                    <!-- Dashboard Principal -->
+                    <div id="dashboard-content">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Bienvenido al Sistema de Gestión INFOTEP</h3>
                                     </div>
-                                </div>
-                                
-                                <div class="col-md-4">
-                                    <div class="card card-success">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Participante Seleccionado</h3>
-                                        </div>
-                                        <div class="card-body text-center">
-                                            <div class="selected-display">
-                                                <div class="selected-icon">
-                                                    <i class="fas fa-user-graduate fa-4x"></i>
+                                    <div class="card-body text-center">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-gradient-info">
+                                                    <span class="info-box-icon"><i
+                                                            class="fas fa-graduation-cap"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Cursos Activos</span>
+                                                        <span class="info-box-number" id="active-courses-count">0</span>
+                                                    </div>
                                                 </div>
-                                                <h3 id="selected-name" class="selected-name mt-3">Esperando...</h3>
-                                                <div class="selected-status badge badge-primary mt-2" id="selected-status">Listo</div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-gradient-success">
+                                                    <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Total Participantes</span>
+                                                        <span class="info-box-number"
+                                                            id="total-participants-count">0</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-gradient-warning">
+                                                    <span class="info-box-icon"><i class="fas fa-sync-alt"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Rotación Semanal</span>
+                                                        <span class="info-box-number" id="rotation-week">Semana 1</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-gradient-danger">
+                                                    <span class="info-box-icon"><i
+                                                            class="fas fa-layer-group"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Comunidades Activas</span>
+                                                        <span class="info-box-number"
+                                                            id="active-communities-count">3</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="card card-warning">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Controles</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <button class="btn btn-primary btn-block" id="start-btn">
-                                                        <i class="fas fa-play"></i> Iniciar
-                                                    </button>
-                                                </div>
-                                                <div class="col-6">
-                                                    <button class="btn btn-danger btn-block" id="reset-btn">
-                                                        <i class="fas fa-redo"></i> Reiniciar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="form-group mt-3">
-                                                <label>Número a seleccionar:</label>
-                                                <input type="number" class="form-control" id="selection-count" value="5" min="1" max="20">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="card card-info">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Seleccionados</h3>
-                                            <span class="badge badge-light ml-2" id="counter">0/0</span>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="selected-persons" class="selected-persons">
-                                                <!-- Los seleccionados aparecerán aquí -->
-                                            </div>
+                                        <div class="mt-4">
+                                            <h4>Selecciona un curso del panel lateral para comenzar</h4>
+                                            <p class="text-muted">O crea un nuevo curso para iniciar</p>
+                                            <button class="btn btn-primary btn-lg" id="create-first-course">
+                                                <i class="fas fa-plus"></i> Crear Primer Curso
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Pestaña Gestión de Comunidades -->
-                        <div class="tab-pane" id="tab-comunidades">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Crear Nueva Comunidad</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <form id="comunidad-form">
-                                                <div class="form-group">
-                                                    <label>Nombre de la Comunidad</label>
-                                                    <input type="text" class="form-control" id="comunidad-nombre" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Descripción</label>
-                                                    <textarea class="form-control" id="comunidad-descripcion" rows="3"></textarea>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Color identificativo</label>
-                                                    <input type="color" class="form-control" id="comunidad-color" value="#1a2a6c">
-                                                </div>
-                                                <button type="submit" class="btn btn-primary btn-block">
-                                                    <i class="fas fa-plus"></i> Crear Comunidad
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Comunidades Existentes</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="comunidades-list" class="row">
-                                                <!-- Las comunidades se cargarán aquí -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pestaña Gestión de Participantes -->
-                        <div class="tab-pane" id="tab-participantes">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Gestión de Participantes</h3>
-                                            <div class="card-tools">
-                                                <button class="btn btn-success" id="add-participant-btn">
-                                                    <i class="fas fa-plus"></i> Agregar Participante
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <table id="participants-table" class="table table-bordered table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Nombre</th>
-                                                        <th>Comunidad</th>
-                                                        <th>Estado</th>
-                                                        <th>Veces Seleccionado</th>
-                                                        <th>Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Los participantes se cargarán aquí -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pestaña Configuración -->
-                        <div class="tab-pane" id="tab-configuracion">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Configuración General</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <form id="settings-form">
-                                                <div class="form-group">
-                                                    <label>Nombre del Profesor</label>
-                                                    <input type="text" class="form-control" id="professor-name-input" value="Profesor">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Duración del giro (segundos)</label>
-                                                    <input type="number" class="form-control" id="spin-duration" value="4" min="2" max="10">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Sonido de notificación</label>
-                                                    <select class="form-control" id="sound-enabled">
-                                                        <option value="true">Activado</option>
-                                                        <option value="false">Desactivado</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Texto a voz</label>
-                                                    <select class="form-control" id="text-to-speech">
-                                                        <option value="true">Activado</option>
-                                                        <option value="false">Desactivado</option>
-                                                    </select>
-                                                </div>
-                                                <button type="submit" class="btn btn-primary">Guardar Configuración</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Importar/Exportar Datos</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="form-group">
-                                                <label>Exportar datos</label>
-                                                <button class="btn btn-info btn-block" id="export-btn">
-                                                    <i class="fas fa-download"></i> Exportar Configuración
-                                                </button>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Importar datos</label>
-                                                <input type="file" class="form-control-file" id="import-file" accept=".json">
-                                                <button class="btn btn-warning btn-block mt-2" id="import-btn">
-                                                    <i class="fas fa-upload"></i> Importar Configuración
-                                                </button>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Restablecer</label>
-                                                <button class="btn btn-danger btn-block" id="reset-data-btn">
-                                                    <i class="fas fa-trash"></i> Restablecer Datos
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pestaña Estadísticas -->
-                        <div class="tab-pane" id="tab-estadisticas">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Estadísticas de Uso</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="stats-chart" width="400" height="200"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Resumen</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="info-box">
-                                                <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
-                                                <div class="info-box-content">
-                                                    <span class="info-box-text">Total Participantes</span>
-                                                    <span class="info-box-number" id="total-participants">0</span>
-                                                </div>
-                                            </div>
-                                            <div class="info-box">
-                                                <span class="info-box-icon bg-success"><i class="fas fa-sync"></i></span>
-                                                <div class="info-box-content">
-                                                    <span class="info-box-text">Sesiones Realizadas</span>
-                                                    <span class="info-box-number" id="total-sessions">0</span>
-                                                </div>
-                                            </div>
-                                            <div class="info-box">
-                                                <span class="info-box-icon bg-warning"><i class="fas fa-chart-line"></i></span>
-                                                <div class="info-box-content">
-                                                    <span class="info-box-text">Selecciones Totales</span>
-                                                    <span class="info-box-number" id="total-selections">0</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Contenido específico del curso seleccionado -->
+                    <div id="course-content" style="display: none;">
+                        <!-- Aquí se cargará el contenido específico del curso -->
                     </div>
                 </div>
             </div>
@@ -386,23 +157,44 @@
 
         <!-- Footer -->
         <footer class="main-footer">
-            <strong>Copyright &copy; 2025 <a href="#">Dinámica Educativa</a>.</strong>
-            Todos los derechos reservados.
+            <strong>&copy; <a href="#">Pedro Garcia</a> 2025 </strong> |
+            Sistema de Gestión de Cursos.
             <div class="float-right d-none d-sm-inline-block">
                 <b>Versión</b> 2.0.0
             </div>
         </footer>
     </div>
 
+    <!-- Modal para Gestión de Cursos -->
+    <div class="modal fade" id="coursesModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gestión de Cursos</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Contenido del modal se cargará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Agregar después de los otros scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+    <!-- Nuestros Scripts -->
     <script src="js/app.js"></script>
-    <script src="js/wheel.js"></script>
-    <script src="js/communities.js"></script>
     <script src="js/participants.js"></script>
-    <script src="js/stats.js"></script>
+    <script src="js/communities.js"></script>
+    <script src="js/rotation.js"></script>
+    <script src="js/expectations.js"></script>
 </body>
+
 </html>
