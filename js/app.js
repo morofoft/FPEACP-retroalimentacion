@@ -236,4 +236,4 @@ loadInitialData() {
 $(document).ready(() => {
     window.app = new DinamicaApp();
     app.init();
-});
+}); 
