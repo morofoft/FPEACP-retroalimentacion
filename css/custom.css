@@ -26,3 +26,26 @@
 .table-active {
     background-color: #e3f2fd !important;
 }
+
+/* Estilos para el QR code */
+#qrcode-canvas {
+    display: inline-block;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    padding: 10px;
+    background: white;
+    margin-bottom: 15px;
+}
+
+#qrcode-canvas canvas {
+    border-radius: 5px;
+}
+
+#qrcode-canvas img {
+    border-radius: 5px;
+}
+
+/* Botón de regenerar QR */
+#refresh-qr {
+    margin-top: 10px;
+}

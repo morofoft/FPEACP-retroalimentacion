@@ -16,18 +16,42 @@
             background: white;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: 20px 0;
         }
         .course-header {
             background: linear-gradient(135deg, #1a2a6c, #2c3e50);
             color: white;
             border-radius: 15px 15px 0 0;
+            padding: 20px;
+        }
+        .btn-purple {
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+        }
+        .btn-purple:hover {
+            background: linear-gradient(135deg, #5a2d91, #c2176a);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px;
+        }
+        .form-control:focus {
+            border-color: #1a2a6c;
+            box-shadow: 0 0 0 0.2rem rgba(26, 42, 108, 0.25);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-10 col-lg-8">
                 <div class="card expectations-card">
                     <div class="card-header course-header text-center">
                         <h3 class="mb-0">
@@ -35,6 +59,7 @@
                         </h3>
                     </div>
                     <div class="card-body p-4">
+                        <!-- Información del curso -->
                         <div id="course-info" class="text-center mb-4">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="sr-only">Cargando...</span>
@@ -42,75 +67,80 @@
                             <p class="mt-2">Cargando información del curso...</p>
                         </div>
 
+                        <!-- Selección de participante -->
+                        <div id="participant-selection" style="display: none;">
+                            <!-- Se llena dinámicamente con JavaScript -->
+                        </div>
+
+                        <!-- Información del participante seleccionado -->
+                        <div id="participant-info" class="mb-3" style="display: none;"></div>
+
+                        <!-- Formulario de expectativas -->
                         <form id="expectations-form" style="display: none;">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
-                                <strong>Instrucciones:</strong> Comparte honestamente tus expectativas. 
-                                Esto ayudará a personalizar el curso para tus necesidades.
+                                <strong>Instrucciones:</strong> Por favor, comparte honestamente tus expectativas. 
+                                Esta información ayudará al instructor a personalizar el curso para tus necesidades.
                             </div>
 
                             <div class="form-group">
                                 <label class="font-weight-bold">¿Qué espero aprender en este curso? *</label>
                                 <textarea class="form-control" id="expectation1" rows="3" 
-                                          placeholder="Ej: Espero aprender a instalar sistemas eléctricos, entender diagramas, manejar herramientas..." 
+                                          placeholder="Ej: Espero aprender a instalar sistemas eléctricos residenciales, entender diagramas eléctricos, manejar herramientas de electricista, realizar mantenimiento preventivo..." 
                                           required></textarea>
-                                <small class="form-text text-muted">Describe los conocimientos o habilidades que esperas adquirir</small>
+                                <small class="form-text text-muted">Describe los conocimientos técnicos o habilidades prácticas que esperas adquirir</small>
                             </div>
 
                             <div class="form-group">
                                 <label class="font-weight-bold">¿Cómo aplicaré estos conocimientos en mi trabajo o vida personal? *</label>
                                 <textarea class="form-control" id="expectation2" rows="3" 
-                                          placeholder="Ej: Podré aplicar esto en mi trabajo como electricista, mejorar mis servicios, emprender mi propio negocio..." 
+                                          placeholder="Ej: Podré aplicar esto en mi trabajo como asistente eléctrico, mejorar la calidad de mis instalaciones, ofrecer mejores servicios a mis clientes, emprender mi propio negocio de instalaciones eléctricas..." 
                                           required></textarea>
-                                <small class="form-text text-muted">Piensa en situaciones prácticas donde usarás lo aprendido</small>
+                                <small class="form-text text-muted">Piensa en situaciones reales donde usarás lo aprendido</small>
                             </div>
 
                             <div class="form-group">
                                 <label class="font-weight-bold">¿Qué metas personales o profesionales espero alcanzar con este curso? *</label>
                                 <textarea class="form-control" id="expectation3" rows="3" 
-                                          placeholder="Ej: Obtener mi certificación, conseguir un mejor empleo, aumentar mis ingresos, ser más competitivo..." 
+                                          placeholder="Ej: Obtener mi certificación como electricista, conseguir un empleo mejor remunerado, aumentar mis ingresos mensuales, ser más competitivo en el mercado laboral, poder independizarme profesionalmente..." 
                                           required></textarea>
-                                <small class="form-text text-muted">Define tus objetivos específicos</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="font-weight-bold">Información del Participante</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" id="participant-name" 
-                                               placeholder="Tu nombre completo" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" id="participant-id" 
-                                               placeholder="Tu ID o cédula">
-                                    </div>
-                                </div>
+                                <small class="form-text text-muted">Define tus objetivos específicos a corto y mediano plazo</small>
                             </div>
 
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <strong>Importante:</strong> Una vez enviadas, tus expectativas serán revisadas por el instructor.
+                                <strong>Importante:</strong> Tus respuestas serán revisadas por el instructor para adaptar el curso a tus necesidades. Sé específico y honesto.
                             </div>
 
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary btn-lg">
+                                <button type="submit" class="btn btn-purple btn-lg">
                                     <i class="fas fa-paper-plane"></i> Enviar Mis Expectativas
                                 </button>
                             </div>
                         </form>
 
+                        <!-- Mensaje de éxito -->
                         <div id="success-message" class="alert alert-success text-center" style="display: none;">
                             <i class="fas fa-check-circle fa-2x mb-3"></i>
                             <h4>¡Gracias por compartir tus expectativas!</h4>
-                            <p>Tus respuestas han sido guardadas exitosamente.</p>
-                            <p class="mb-0"><strong>¡Éxito en el curso!</strong></p>
+                            <p>Tu información ha sido guardada exitosamente y será revisada por el instructor.</p>
+                            <p class="mb-0"><strong>¡Te deseamos mucho éxito en el curso!</strong></p>
                         </div>
 
-                        <div id="error-message" class="alert alert-danger text-center" style="display: none;">
+                        <!-- Mensaje de error -->
+                        <div id="error-message" class="alert alert-danger" style="display: none;">
                             <i class="fas fa-exclamation-triangle"></i>
                             <span id="error-text"></span>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Información de ayuda -->
+                <div class="text-center mt-3">
+                    <small class="text-light">
+                        <i class="fas fa-question-circle"></i>
+                        Si tienes problemas con este formulario, contacta a tu instructor.
+                    </small>
                 </div>
             </div>
         </div>
